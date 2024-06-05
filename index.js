@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const sequelize = require("./db");
 const bot = require("./bot");
+const router = require("./routes/index");
 const { User, Category, Order, Product, OrderProduct } = require("./models");
 
 const webAppUrl = process.env.WEB_URL;
@@ -10,6 +11,7 @@ const webAppUrl = process.env.WEB_URL;
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use("/api", router);
 
 const start = async () => {
     try {
@@ -33,6 +35,37 @@ start();
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
+
+    if (text === "/user") {
+        try {
+            const user = await User.findOne({
+                where: { chatId },
+                // attributes: ["id", "chatId"],
+                include: {
+                    model: Order,
+                    attributes: {
+                        exclude: ["userId"],
+                    },
+                    include: {
+                        model: OrderProduct,
+                        attributes: {
+                            exclude: ["orderId", "productId"],
+                        },
+                        include: {
+                            model: Product,
+                            attributes: {
+                                exclude: ["categoryId"],
+                            },
+                            include: Category,
+                        },
+                    },
+                },
+            });
+            console.log(user.toJSON());
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     if (text === "/start") {
         try {

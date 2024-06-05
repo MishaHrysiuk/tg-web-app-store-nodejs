@@ -13,6 +13,7 @@ const User = sequelize.define(
         chatId: {
             type: DataTypes.INTEGER,
             unique: true,
+            allowNull: false,
         },
         phone: {
             type: DataTypes.STRING,

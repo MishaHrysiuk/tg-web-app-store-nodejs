@@ -12,6 +12,7 @@ const OrderProduct = sequelize.define(
         },
         count: {
             type: DataTypes.INTEGER,
+            allowNull: false,
         },
     },
     {
