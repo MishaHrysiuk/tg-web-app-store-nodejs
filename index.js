@@ -4,7 +4,7 @@ const cors = require("cors");
 const sequelize = require("./db");
 const bot = require("./bot");
 const router = require("./routes/index");
-const { User, Category, Order, Product, OrderProduct } = require("./models");
+const { User } = require("./models");
 
 const webAppUrl = process.env.WEB_URL;
 
@@ -35,37 +35,6 @@ start();
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
-
-    if (text === "/user") {
-        try {
-            const user = await User.findOne({
-                where: { chatId },
-                // attributes: ["id", "chatId"],
-                include: {
-                    model: Order,
-                    attributes: {
-                        exclude: ["userId"],
-                    },
-                    include: {
-                        model: OrderProduct,
-                        attributes: {
-                            exclude: ["orderId", "productId"],
-                        },
-                        include: {
-                            model: Product,
-                            attributes: {
-                                exclude: ["categoryId"],
-                            },
-                            include: Category,
-                        },
-                    },
-                },
-            });
-            console.log(user.toJSON());
-        } catch (e) {
-            console.log(e);
-        }
-    }
 
     if (text === "/start") {
         try {
@@ -132,22 +101,5 @@ bot.on("message", async (msg) => {
         } catch (e) {
             console.log(e);
         }
-    }
-});
-
-app.post("/web-data", async (req, res) => {
-    const { queryId, products = [], totalPrice } = req.body;
-    try {
-        await bot.answerWebAppQuery(queryId, {
-            type: "article",
-            id: queryId,
-            title: "Успішна покупка",
-            input_message_content: {
-                message_text: `Вітаю з покупкою, ви купили товару на суму ${totalPrice}, ${products.map((item) => item.title).join(", ")}`,
-            },
-        });
-        return res.status(200).json({});
-    } catch (e) {
-        return res.status(500).json({});
     }
 });
